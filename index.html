@@ -17,23 +17,33 @@
         <input type="text" data-clear-btn="true" id="userPass" placeholder="Password" value = "">
         <a role = "button" id = "userLoginButton" class = "ui-shadow ui-btn ui-corner-all" data-transition = "flip">Log in</a>
     </form>
+    <form>
+    	<input type="text" data-clear-btn="true" id="contactUser" placeholder="Contact name" value = "">
+        <input type="text" data-clear-btn="true" id="contactNumber" placeholder="Phone number" value = "">
+        <a role = "button" id = "contactSubmit" class = "ui-shadow ui-btn ui-corner-all" data-transition = "flip">Add contact</a>
+    </form>
     <p id="userloginconfirm"></p>
+    <p id="contactConfirm"></p>
 	<script>
+
+	$(document).ready(function(){
 		var username;
 		var password;
 		var firstname;
 		var lastname;
-		var users = new Firebase('https://imboredtc.firebaseio.com/');
+		var firebase = new Firebase('https://imboredtc.firebaseio.com/');
 
+
+		//SIGN UP
 		$('#newUserSubmit').click(function (e){
 			password = $('#newUserPass').val();
 			firstname = $('#newUserFirst').val();
 			lastname = $('#newUserLast').val();
 			username = $('#newUserLogin').val();
-			users.child(username).on('value', function(snapshot) {
+			firebase.child(username).once('value', function(snapshot) {
 	            if (snapshot.val() === null) {
-		            users.child(username);
-		            users.child(username).set({first:firstname, last:lastname, id: username, password:password, contacts:[], bored:false});
+		            firebase.child(username);
+		            firebase.child(username).set({first:firstname, last:lastname, id: username, password:password, contacts:[], bored:false, contactNum:0});
 		            $('#userloginconfirm').append('Welcome to imbored, ' +firstname);
 	            } 
 	            else {
@@ -42,14 +52,16 @@
 	        });
         });
 
+		//SIGN IN
         $('#userLoginButton').click(function (e){
         	username = $('#userLogin').val();
         	password = $('#userPass').val();
-        	users.child(username).on('value', function(snapshot) {
+        	firebase.child(username).once('value', function(snapshot) {
 	            if (snapshot.val() !== null) {
 	            	userinfo = snapshot.val();
 	            	if (userinfo.password == password){
 	            		$('#userloginconfirm').append('Login Successful, ' +userinfo.first);
+	            		// displayContacts();
 	            	} else {
 	            		$('#userloginconfirm').append('That password is incorrect');
 	            	}
@@ -58,6 +70,46 @@
 	            }
 	        });
         });
+
+        //ADD CONTACT
+        $('#contactSubmit').click(function (e){
+        	var contactUser = $('#contactUser').val();
+        	var contactNumber = $('#contactNumber').val();
+        	firebase.child(contactUser).once('value', function(snapshot) {
+	            if (snapshot.val() === null) {
+	        		$('#contactConfirm').append('that user does not exist.');
+        		} else {
+        			firebase.child(username+'/contacts/'+contactUser).update({name:contactUser, number:contactNumber});
+        			firebase.child(username+'/contactNum/').once('value', function(snapshot) {
+        				var contactCount = snapshot.val();
+        				contactCount += 1;
+        				firebase.child(username).update({contactNum:contactCount});
+	       			});
+	       			displayContacts();
+        		}
+        	});
+        })
+
+        //SHOW CONTACTS
+        // function displayContacts() {
+        // 	firebase.child(username+'/contacts').once('value', function(snapshot) {
+        // 		contactList = snapshot.val();
+        // 		firebase.child(username+'/contactNum/').once('value', function(snapshot) {
+        // 			var contactCount = snapshot.val();
+        // 		});
+        // 		//console.log(contactList);
+        // 		for (i = 0; i < contactCount; i++) { 
+        // 			console.log('contact');
+        // 		}
+        // 	});
+        // }
+    })
+
+
+
+
+
+
 
 	</script>
 
