@@ -1,0 +1,77 @@
+<html>
+<head>
+	<script src="https://cdn.firebase.com/js/client/2.2.9/firebase.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+</head>
+<body>
+	<form>
+		<input type="text" data-clear-btn="true" id="newUserFirst" placeholder="First name" value = "">
+		<input type="text" data-clear-btn="true" id="newUserLast" placeholder="Last name" value = "">
+        <input type="text" data-clear-btn="true" id="newUserLogin" placeholder="Username" value = "">
+        <input type="text" data-clear-btn="true" id="newUserPass" placeholder="Password" value = "">
+        <a role = "button" id = "newUserSubmit" class = "ui-shadow ui-btn ui-corner-all" data-transition = "flip">Sign up</a>
+        <!--<p id="logIn"></p>-->
+    </form>
+    <form>
+    	<input type="text" data-clear-btn="true" id="userLogin" placeholder="Username" value = "">
+        <input type="text" data-clear-btn="true" id="userPass" placeholder="Password" value = "">
+        <a role = "button" id = "userLoginButton" class = "ui-shadow ui-btn ui-corner-all" data-transition = "flip">Log in</a>
+    </form>
+    <p id="userloginconfirm"></p>
+	<script>
+		var username;
+		var password;
+		var firstname;
+		var lastname;
+		var users = new Firebase('https://imboredtc.firebaseio.com/');
+
+		$('#newUserSubmit').click(function (e){
+			password = $('#newUserPass').val();
+			firstname = $('#newUserFirst').val();
+			lastname = $('#newUserLast').val();
+			username = $('#newUserLogin').val();
+			users.child(username).on('value', function(snapshot) {
+	            if (snapshot.val() === null) {
+		            users.child(username);
+		            users.child(username).set({first:firstname, last:lastname, id: username, password:password, contacts:[], bored:false});
+		            $('#userloginconfirm').append('Welcome to imbored, ' +firstname);
+	            } 
+	            else {
+	            	$('#userAdded').append('This user already exists. Please go sign in.');
+	            }
+	        });
+        });
+
+        $('#userLoginButton').click(function (e){
+        	username = $('#userLogin').val();
+        	password = $('#userPass').val();
+        	users.child(username).on('value', function(snapshot) {
+	            if (snapshot.val() !== null) {
+	            	userinfo = snapshot.val();
+	            	if (userinfo.password == password){
+	            		$('#userloginconfirm').append('Login Successful, ' +userinfo.first);
+	            	} else {
+	            		$('#userloginconfirm').append('That password is incorrect');
+	            	}
+	            } else {
+	            	$('#userloginconfirm').append('that username does not exist.');
+	            }
+	        });
+        });
+
+	</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
